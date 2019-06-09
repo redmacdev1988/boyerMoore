@@ -1,8 +1,98 @@
 
 const MATCH_NAME = 'Boyer-Moore';
+const MAX = 256;
 
-class BmStringMatcher {
+class BM_BadChar {
+    constructor() {
+        console.log(`constructing an ${MATCH_NAME} instance`);
 
+        let _patternLength = 0;
+        
+        let _badCharacter = [MAX];  
+        let _pattern = null;
+   
+        let _text = null;
+        let _textLength = 0;
+
+        function setText(tt) {
+            _textLength = tt.length;
+            _text = tt;
+        }
+
+        function setPattern(pp) {
+            _patternLength = pp.length;
+            _pattern = pp;
+        }
+
+        function badCharacterHeuristic(patternStr, badCharArr) {
+            for (let i = 0; i < MAX; i++) { badCharArr[i] = -1; }
+            for(let j = 0; j < _patternLength; j++) {
+                let pChar = patternStr[j];           
+                let asciiIndex = pChar.charCodeAt(0);
+                _badCharacter[asciiIndex] = j;   //set position of character in the array.
+            }  
+        }
+
+    function textSubstring_At_i_Match_Pattern(textIndex) {
+
+        // match it going backwards
+        let pIndex = _patternLength - 1;
+        while (pIndex >= 0 && _pattern[pIndex] == _text[ textIndex + pIndex ]) { 
+            pIndex--; 
+        }
+        return pIndex;
+    }
+
+
+    function bmSearch() {
+        badCharacterHeuristic(_pattern, _badCharacter); 
+
+        let shift = 0;
+        let index = -1;
+        let locArray = [];
+        let patternIndex;
+
+        while (shift <= _textLength - _patternLength) {
+
+            patternIndex = textSubstring_At_i_Match_Pattern(shift);
+            if (patternIndex < 0) {
+                console.log(`MATCH! at ${shift}`);
+                index++;
+                locArray[index] = shift;
+
+                if((shift + _patternLength) < _textLength) { 
+                    let charAtText = _text[shift + _patternLength];
+                    shift += _patternLength - _badCharacter[charAtText.charCodeAt(0)];
+                } else {
+                    shift += 1;
+                }
+            } else {
+                let charAtText = _text[shift+patternIndex];
+                shift += Math.max(1, patternIndex - _badCharacter[charAtText.charCodeAt(0)]);
+            }
+        }
+
+    }
+
+        this.search = function(tt, pp) {
+            console.log(`set text: ${tt}, set pattern: ${pp}`);
+            setText(tt);
+            setPattern(pp);
+            bmSearch();
+        }
+    }   
+}
+
+let b = new BM_BadChar();
+b.search('aabcaaa', 'aa');
+
+
+/*
+let a = new BM_GoodSuffix();
+a.search('aacaacaacaa', 'aacaa');
+
+
+class BM_GoodSuffix {
     constructor() {
         console.log(`constructing an ${MATCH_NAME} instance`);
 
@@ -88,27 +178,32 @@ class BmStringMatcher {
             bmPreprocess();
         }
 
-     
+        // Keep reducing pattern index while characters of pattern and text are matching at this shift s
+        function textSubstring_At_i_Match_Pattern(textIndex) {
+
+            // match it going backwards
+            let pIndex = _patternLength - 1;
+            while (pIndex >= 0 && _pattern[pIndex] == _text[ textIndex + pIndex ]) { 
+                pIndex--; 
+            }
+            return pIndex;
+        }
+
         function bmSearch() {
             console.log(` ------------------- Now, lets search! --------------------`);
 
-            let i = 0;
-            let j = 0;
+            let textIndex = 0;
+            let patternIndex;
 
-            while (i <= _textLength - _patternLength) {
-                console.log(`lets process i ${i}`);
-                j = _patternLength - 1;
+            while (textIndex <= _textLength - _patternLength) {
 
-                // Keep reducing index j of pattern while characters of pattern and text are matching at this shift s
-                while ( j >= 0 && _pattern[j] == _text[i+j]) { j--; }
+                patternIndex = textSubstring_At_i_Match_Pattern(textIndex);
 
-                if (j < 0) {
-                    // If the pattern is present at current shift, then index j will become -1 after the above loop 
-                    console.log(` √ at ${i}`);
-                    i += _shift[0];
+                if (patternIndex < 0) {
+                    console.log(` √ at ${textIndex}`);
+                    textIndex += _shift[0];
                 } else {
-                    // pattern at [i] != pattern at [s+j] so shift the pattern  shift[j+1] times  */
-                    i += (_shift[j+1]) ? _shift[j+1] : 1;
+                    textIndex += (_shift[ patternIndex + 1 ]) ? _shift[ patternIndex + 1 ] : 1;
                 }
             }
         }
@@ -122,5 +217,6 @@ class BmStringMatcher {
     }   
 }
 
-let a = new BmStringMatcher();
+let a = new BM_GoodSuffix();
 a.search('aacaacaacaa', 'aacaa');
+*/
