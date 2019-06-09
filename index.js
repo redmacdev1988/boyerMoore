@@ -6,9 +6,9 @@ class BM_BadChar {
     constructor() {
         console.log(`constructing an ${MATCH_NAME} instance`);
 
-        let _patternLength = 0;
-        
         let _badCharacter = [MAX];  
+
+        let _patternLength = 0;
         let _pattern = null;
    
         let _text = null;
@@ -48,8 +48,6 @@ class BM_BadChar {
         badCharacterHeuristic(_pattern, _badCharacter); 
 
         let shift = 0;
-        let index = -1;
-        let locArray = [];
         let patternIndex;
 
         while (shift <= _textLength - _patternLength) {
@@ -57,8 +55,6 @@ class BM_BadChar {
             patternIndex = textSubstring_At_i_Match_Pattern(shift);
             if (patternIndex < 0) {
                 console.log(`MATCH! at ${shift}`);
-                index++;
-                locArray[index] = shift;
 
                 if((shift + _patternLength) < _textLength) { 
                     let charAtText = _text[shift + _patternLength];
